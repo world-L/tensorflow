@@ -1,55 +1,56 @@
 %matplotlib inline
 
-# X 와 Y 의 상관관계를 분석하는 기초적인 선형 회귀 모델을 만들고 실행해봅니다.
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-x_data = [1,5,7]
-y_data = [1,5,7]
+x_data = [1,2,3]
+y_data = [1,2,3]
 
 W = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
 b = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
 
-# name: 나중에 텐서보드등으로 값의 변화를 추적하거나 살펴보기 쉽게 하기 위해 이름을 붙여줍니다.
+# for tensorboard
 X = tf.placeholder(tf.float32, name="X")
 Y = tf.placeholder(tf.float32, name="Y")
 
-# X 와 Y 의 상관 관계를 분석하기 위한 가설 수식을 작성합니다.
-# y = W * x + b
-# W 와 X 가 행렬이 아니므로 tf.matmul 이 아니라 기본 곱셈 기호를 사용했습니다.
+# make hypothesis
 hypothesis = W * X + b
 
-# 손실 함수를 작성합니다.
-# mean(h - Y)^2 : 예측값과 실제값의 거리를 비용(손실) 함수로 정합니다.
+# mean ( (X*W+b - Y)^2 )
 cost = tf.reduce_mean(tf.square(hypothesis - Y))
-# 텐서플로우에 기본적으로 포함되어 있는 함수를 이용해 경사 하강법 최적화를 수행합니다.
+
+# train with Gradient Descent method
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
-# 비용을 최소화 하는 것이 최종 목표
 train_op = optimizer.minimize(cost)
 
 
 # For graph
 W_val = []
+b_val = []
 c_val = []
+step_val = []
 
 
-# 세션을 생성하고 초기화합니다.
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    # 최적화를 100번 수행합니다.
-    for step in range(-30, 50):
-        # sess.run 을 통해 train_op 와 cost 그래프를 계산합니다.
-        # 이 때, 가설 수식에 넣어야 할 실제값을 feed_dict 을 통해 전달합니다.
-
+    print('{:>1} {:>8} {:>18} {:>13}'.format("step", "cost", "weight", "bias"))
+    print()
+    
+    # iteration of optimization
+    for step in range(200):
+        # caculating
         _ , cost_val = sess.run([train_op, cost], feed_dict={X: x_data, Y: y_data})
-        #print(step, cost_val, sess.run(W), sess.run(b))
-        W_val.append(step)
+        
+        # print        
+        ### print('{:2d} {:15.6f} {:15.6f} {:15.6f}'.format(step, cost_val, sess.run(W)[0], sess.run(b)[0]))
+        
+        #for graph
+        W_val.append(sess.run(W)[0])
+        b_val.append(sess.run(b)[0])
         c_val.append(cost_val)
-#     for i in range(-30, 50):
-#     print( i*0.1, sess.run(cost, feed_dict={W: i*0.1}))
-#     W_val.append( i*0.1)
-#     cost_val.append(sess.run(cost, feed_dict={W: i*0.1}))
-    # 최적화가 완료된 모델에 테스트 값을 넣고 결과가 잘 나오는지 확인해봅니다.
+        step_val.append(step)
+
+    # result
     print("\n=== Test ===")
     print("X: 5, Y:", sess.run(hypothesis, feed_dict={X: 5}))
     print("X: 2.5, Y:", sess.run(hypothesis, feed_dict={X: 2.5}))
@@ -58,7 +59,11 @@ with tf.Session() as sess:
 
     
 # Graphic display
-plt.plot(W_val, c_val, 'ro')
-plt.ylabel('Cost')
-plt.xlabel('W')
+plot_cost=plt.plot(step_val, c_val, 'ro', label='cost')
+plot_weight=plt.plot(step_val, W_val, 'g*', label='weight')
+plot_bias=plt.plot(step_val, b_val, 'b+', label='bias')
+
+plt.legend(loc='upper right')
+plt.ylabel('Cost-Weight-bias')
+plt.xlabel('Step')
 plt.show()
