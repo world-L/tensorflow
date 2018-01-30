@@ -6,8 +6,7 @@ import numpy as np
 x_data = np.array(
     [[0, 0], [1, 0], [1, 1], [0, 0], [0, 0], [0, 1]])
 
-# [기타, 포유류, 조류]
-# 다음과 같은 형식을 one-hot 형식의 데이터라고 합니다.
+# one-hpt data
 y_data = np.array([
     [1, 0, 0],  # 기타
     [0, 1, 0],  # 포유류
@@ -46,8 +45,8 @@ print("===X*weigth+b===")
 print(sess.run(L, feed_dict={X: x_data}))
 print()
 
-# 가중치와 편향을 이용해 계산한 결과 값에
-# 텐서플로우에서 기본적으로 제공하는 활성화 함수인 ReLU 함수를 적용합니다.
+# Rectifier,  activation function defined as the positive part of its argument
+# https://en.wikipedia.org/wiki/Rectifier_(neural_networks)
 L = tf.nn.relu(L)
 print("===relu===")
 print(sess.run(L, feed_dict={X: x_data}))
