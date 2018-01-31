@@ -41,6 +41,10 @@ print("===weight===")
 print(sess.run(W))
 print()
 
+print("===Y===")
+print(sess.run(Y, feed_dict={Y: y_data}))
+print()
+
 print("===X*weigth+b===")
 print(sess.run(L, feed_dict={X: x_data}))
 print()
@@ -48,17 +52,27 @@ print()
 # Rectifier,  activation function defined as the positive part of its argument
 # https://en.wikipedia.org/wiki/Rectifier_(neural_networks)
 L = tf.nn.relu(L)
-print("===relu===")
+print("===relu===  <- X*weigth+b")
+print()
 print(sess.run(L, feed_dict={X: x_data}))
+print()
 print()
 
 
-# 마지막으로 softmax 함수를 이용하여 출력값을 사용하기 쉽게 만듭니다
-# softmax 함수는 다음처럼 결과값을 전체합이 1인 확률로 만들어주는 함수입니다.
-# 예) [8.04, 2.76, -6.52] -> [0.53 0.24 0.23]
+# 결과 값의 합계를 1로 만들 수 있도록 수정
 model = tf.nn.softmax(L)
-print("===softmax===")
+print("===softmax===  <- relu")
+print()
 print(sess.run(model, feed_dict={X: x_data}))
+print()
+print()
+
+# soft max 결과 확인
+print("===softmax check===")
+print()
+for i in range(sess.run(model, feed_dict={X: x_data}).shape[0]):
+    print(sess.run(model,feed_dict={X:x_data})[i].sum())
+print()
 print()
 
 # 신경망을 최적화하기 위한 비용 함수를 작성합니다.
@@ -72,16 +86,22 @@ print()
 # 이것을 Cross-Entropy 라고 합니다.
 cost = tf.reduce_mean(-tf.reduce_sum(Y * tf.log(model), axis=1))
 
-print("===Y*log()===")
+print("===Y*log(model)===  <- softmax")
+print()
 print(sess.run(Y * tf.log(model), feed_dict={X: x_data,Y: y_data}))
 print()
-
-print("===+reduce sum with negative===")
-print(sess.run(-tf.reduce_sum(Y * tf.log(model)), feed_dict={X: x_data,Y: y_data}))
 print()
 
-print("===+reduce mean axis1===")
+print("===reduce sum axis1===  <- Y*log(model)")
+print()
+print(sess.run(-tf.reduce_sum(Y * tf.log(model), axis=1), feed_dict={X: x_data,Y: y_data}))
+print()
+print()
+
+print("===reduce mean===")
+print()
 print(sess.run(cost, feed_dict={X: x_data,Y: y_data}))
+print()
 print()
 
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
@@ -104,16 +124,18 @@ for step in range(100):
         #print(sess.run(model, feed_dict={X: x_data}))
         print()
 
-#########
-# 결과 확인
-# 0: 기타 1: 포유류, 2: 조류
-######
-# tf.argmax: 예측값과 실제값의 행렬에서 tf.argmax 를 이용해 가장 큰 값을 가져옵니다.
-# 예) [[0 1 0] [1 0 0]] -> [1 0]
-#    [[0.2 0.7 0.1] [0.9 0.1 0.]] -> [1 0]
+
+# tf.argmax: Returns the index with the largest value across dimensions of a tensor
+
 prediction = tf.argmax(model, 1)
 target = tf.argmax(Y, 1)
 
+print("===model===")
+print(sess.run(model, feed_dict={X: x_data}))
+
+print("===target===")
+print(sess.run(Y, feed_dict={Y: y_data}))
+print()
 print('예측값:', sess.run(prediction, feed_dict={X: x_data}))
 print('실제값:', sess.run(target, feed_dict={Y: y_data}))
 
