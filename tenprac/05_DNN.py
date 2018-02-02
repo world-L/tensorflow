@@ -15,6 +15,21 @@ y_data = np.array([
     [0, 0, 1]
 ])
 
+## test set
+#[털, 날개]
+x_test = np.array(
+    [[1, 0], [1, 0], [0, 1], [0, 0], [0, 0], [1, 0]])
+
+# [기타, 포유류, 조류]
+y_test = np.array([
+    [0, 1, 0],  # 기타
+    [0, 1, 0],  # 포유류
+    [0, 0, 1],  # 조류
+    [1, 0, 0],
+    [1, 0, 0],
+    [0, 0, 1]
+])
+
 X = tf.placeholder(tf.float32)
 Y = tf.placeholder(tf.float32)
 
@@ -77,23 +92,31 @@ print()
 print(sess.run(model, feed_dict={X: x_data}))
 print()
 
+print("===softmax_cross_entropy_with_logits===")
+print()
+print(sess.run(tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=model), feed_dict={X: x_data, Y: y_data}))
+print()
+
+print("===cost = reduce_mean(softmax_cross_entropy_with_logits=)==")
+print()
+print(sess.run(tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=model)), feed_dict={X: x_data, Y: y_data}))
+print()
 
 
-for step in range(100):
+for step in range(50):
     sess.run(train_op, feed_dict={X: x_data, Y: y_data})
 
-    if (step + 1) % 10 == 0:
+    if (step + 1) % 20 == 0:
         print(step + 1, sess.run(cost, feed_dict={X: x_data, Y: y_data}))
+        #print(sess.run(model, feed_dict={X: x_data, Y: y_data}))
+        print()
 
 
-#########
-# 결과 확인
-# 0: 기타 1: 포유류, 2: 조류
-######
+#result
 prediction = tf.argmax(model, 1)
 target = tf.argmax(Y, 1)
-print('예측값:', sess.run(prediction, feed_dict={X: x_data}))
-print('실제값:', sess.run(target, feed_dict={Y: y_data}))
+print('예측값:', sess.run(prediction, feed_dict={X: x_test}))
+print('실제값:', sess.run(target, feed_dict={Y: y_test}))
 
 is_correct = tf.equal(prediction, target)
 accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
